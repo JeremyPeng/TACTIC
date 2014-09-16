@@ -229,6 +229,7 @@ class DiscussionElementWdg(BaseTableElementWdg):
             # draw note item
             date = note.get_value('timestamp')
             value = parser.parse(date)
+            value = SPTDate.convert_to_local(value)
             setting = "%Y-%m-%d %H:%M"
             date_value = value.strftime(setting)
             comment_area.append(note.get_value("login"))
