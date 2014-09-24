@@ -84,7 +84,7 @@ TacticServerStub = function() {
     }
 
     this.split_search_key = function(search_key) {
-        
+
         var list = [];
         if (!search_key)
             return search_key;
@@ -253,7 +253,7 @@ TacticServerStub = function() {
 
 
 
-   
+
     this.create_snapshot = function(search_key, context, kwargs) {
         return this._delegate("create_snapshot", arguments, kwargs);
     }
@@ -289,7 +289,7 @@ TacticServerStub = function() {
             kwargs = {__empty__:true};
         }
         var mode_options = ['upload','uploaded', 'copy', 'move', 'inplace','local'];
-        //file_path = spt.path.get_filesystem_path(file_path); 
+        //file_path = spt.path.get_filesystem_path(file_path);
         var mode = kwargs['mode'];
         if (mode == undefined) mode = "upload";
         if (typeof(file_path) != 'string') {
@@ -311,15 +311,15 @@ TacticServerStub = function() {
 
         if (mode == 'upload') {
             var ticket = this.transaction_ticket;
-            
+
             this.upload_file(file_path, ticket);
-            file_path = spt.path.get_filesystem_path(file_path); 
+            file_path = spt.path.get_filesystem_path(file_path);
             kwargs.use_handoff_dir = false;
         }
         // already uploaded
         else if (mode == 'uploaded') {
             kwargs.use_handoff_dir = false;
-            file_path = spt.path.get_filesystem_path(file_path); 
+            file_path = spt.path.get_filesystem_path(file_path);
         }
         else if (['copy', 'move'].contains(mode)) {
             var handoff_dir = this.get_handoff_dir();
@@ -463,7 +463,7 @@ TacticServerStub = function() {
                 }
                 use_handoff_dir = true;
 
-                
+
             }
             else if (mode == 'upload') {
                 applet = spt.Applet.get();
@@ -513,7 +513,7 @@ TacticServerStub = function() {
             applet.rmtree(handoff_dir);
             applet.makedirs(handoff_dir);
             applet.exec("chmod 777 " + handoff_dir);
-            
+
             // copy or move the tree
             var parts = dir.split(/[\/\\]/);
             var dirname = parts.splice(0, parts.length-1).join("/");
@@ -536,7 +536,7 @@ TacticServerStub = function() {
         else if (mode == 'uploaded') {
             kwargs.use_handoff_dir = false;
         }
-            
+
 
         return this._delegate("simple_checkin", arguments, kwargs);
 
@@ -618,8 +618,8 @@ TacticServerStub = function() {
         if ( !(mode in {'copy':'', 'move':'', 'preallocate':'', 'manual': '', 'upload': '', 'uploaded': ''}) ) {
             throw("Mode '" + mode + "' must be in [copy, move, preallocate, manual, upload, uploaded]");
         }
-        
-        file = spt.path.get_filesystem_path(file); 
+
+        file = spt.path.get_filesystem_path(file);
         var use_handoff_dir;
         var handoff_dir;
 
@@ -634,7 +634,7 @@ TacticServerStub = function() {
 
             // copy or move the file
             var basename = spt.path.get_basename(file);
-             
+
             if (mode == 'move') {
                 applet.move(file, handoff_dir + "/" + basename);
             }
@@ -663,7 +663,7 @@ TacticServerStub = function() {
 
     // DEPRECATED: use checkout_snapshot
     this.checkout = function(search_key, context, kwargs) {
-    
+
         // get the files for this search_key, defaults to latest version and checkout to current directory
         if (!kwargs) {
             kwargs = {version: -1, file_type: 'main', to_dir: null, to_sandbox_dir: true, mode: 'download', __empty__:true};
@@ -672,7 +672,7 @@ TacticServerStub = function() {
             kwargs.to_sandbox_dir = true;
         }
 
-     
+
         if (kwargs.mode in {'download':'', 'copy':''} == false) {
             throw("Mode '" + kwargs.mode + "' must be in [download, copy]");
         }
@@ -686,7 +686,7 @@ TacticServerStub = function() {
         delete kwargs.mode;
         delete kwargs.to_sandbox_dir;
         delete kwargs.to_dir;
-        paths = this._delegate("checkout", arguments, kwargs); 
+        paths = this._delegate("checkout", arguments, kwargs);
 
         var client_lib_paths = paths['client_lib_paths'];
         var sandbox_paths = paths['sandbox_paths'];
@@ -724,7 +724,7 @@ TacticServerStub = function() {
                             applet.copy_file(client_lib_path, to_path);
                     }
                     else {
-                        throw("Path [" + client_lib_path + "] does not exist");  
+                        throw("Path [" + client_lib_path + "] does not exist");
                     }
                 }
                 else if (mode == 'download'){
@@ -739,7 +739,7 @@ TacticServerStub = function() {
            alert(spt.exception.handler(e));
         }
         return to_paths
-   
+
     }
 
 
@@ -801,12 +801,15 @@ TacticServerStub = function() {
                 basename = spt.path.get_basename(dst);
             }
             else if (filename_mode == 'versionless') {
-               
+
                 basename = spt.path.get_basename(dst);
                 var dir_name = spt.path.get_dirname(dst);
-                basename = basename.replace(/_v\d+/i, '');
+                // Fix directory version number can't remove
+                // basename = basename.replace(/_v\d+/i, '');
                 dst = dir_name + '/' + basename;
-             
+                // add for fix directory version number can't remove
+                dst = dst.replace(/_v\d+/i, '');
+
             }
             else if (filename_mode == 'source') {
                 console.log(dst);
@@ -867,19 +870,19 @@ TacticServerStub = function() {
     this.get_virtual_snapshot_path = function(search_key, context, kwargs) {
         return this._delegate("get_virtual_snapshot_path", arguments, kwargs);
     }
-    
+
     this.get_all_dependencies = function(snapshot_code, kwargs) {
         return this._delegate("get_all_dependencies", arguments, kwargs);
     }
 
 
 
-    /* 
+    /*
      * Task methods
-     */ 
+     */
     this.create_task = function(search_key, kwargs) {
         return this._delegate("create_task", arguments, kwargs);
-    } 
+    }
 
 
     this.add_initial_tasks = function(search_key, kwargs) {
@@ -896,7 +899,7 @@ TacticServerStub = function() {
     }
 
 
-    
+
     /*
      * Low Level Database methods
      */
@@ -925,7 +928,7 @@ TacticServerStub = function() {
     this.insert = function(search_type, data, kwargs) {
         // server.insert(search_type, data, kwargs);
         return this._delegate("insert", arguments, kwargs);
-        
+
     }
 
 
@@ -938,7 +941,7 @@ TacticServerStub = function() {
     this.update_multiple = function(data, kwargs) {
         data = JSON.stringify(data);
         return this._delegate("update_multiple", arguments, kwargs);
-        
+
     }
 
 
@@ -1035,9 +1038,9 @@ TacticServerStub = function() {
 
 
 
-    /* 
+    /*
      * Note methods
-     */ 
+     */
     this.create_note = function(search_key, note, kwargs) {
         return this._delegate("create_note", arguments, kwargs);
     }
@@ -1162,7 +1165,7 @@ TacticServerStub = function() {
     this.get_base_dirs = function() {
         return this._delegate("get_base_dirs", arguments);
     }
-    
+
     this.get_handoff_dir = function() {
         return this._delegate("get_handoff_dir", arguments);
     }
@@ -1291,7 +1294,7 @@ TacticServerStub = function() {
             delete kwargs.__empty__;
             args.push(kwargs);
         }
-   
+
         //console.log(args);
 
         // handle asynchronous mode
@@ -1334,7 +1337,7 @@ TacticServerStub = function() {
     }
 
 
-        
+
     this._handle_ret_val = function(func_name, ret_val, ret_type) {
         if (ret_val.status != 200) {
             throw(ret_val.status);
@@ -1345,7 +1348,7 @@ TacticServerStub = function() {
         }
         if (ret_type == "string") {
             // manually extract the value returned
-           
+
             var value = ret_val.responseText;
             value = value.replace(/^<\?xml version='1.0'\?>\n<methodResponse>\n<params>\n<param>\n<value><string>/, '');
             value = value.replace(/<\/string><\/value>\n<\/param>\n<\/params>\n<\/methodResponse>/, '');
@@ -1449,7 +1452,7 @@ TacticServerStub = function() {
         return value;
     }
 
-} 
+}
 
 /*
  * Treats the server stub as a singleton and allows you to retrieve the

@@ -1,3 +1,4 @@
+# -*-coding:utf-8-*-
 ###########################################################
 #
 # Copyright (c) 2005, Southpaw Technology
@@ -49,7 +50,7 @@ class MayaImpl(object):
             node_name = interface
         my.app.select(node_name)
 
-       
+
         if mode == 'anim':
             # export the selected node
             file_path = "%s/%s.tmp.anim" % (my.env.get_tmpdir(),instance)
@@ -59,7 +60,7 @@ class MayaImpl(object):
             attrs = my.app.get_all_attrs(node_name)
             omitted = ['tacticNodeData','notes']
             file = open(file_path, "w")
-            
+
             for attr in attrs:
                 if attr in omitted or my.app.is_keyed(node_name, attr):
                     continue
@@ -71,7 +72,7 @@ class MayaImpl(object):
                     my.app.get_attr_default(node_name,attr), \
                     my.app.get_attr(node_name,attr)))
             file.close()
-      
+
         return file_path
 
 
@@ -144,7 +145,7 @@ class MayaImpl(object):
 
     def get_textures_from_path(my, path):
         parser = MayaParser(path)
-      
+
         # add some filters
         texture_filter = MayaParserTextureFilter()
         dir_list = my.get_global_texture_dirs()
@@ -164,14 +165,16 @@ class MayaImpl(object):
 
         #return texture_filter.get_textures()
 
+        #dir_list = my.app.mel('MayaManInfo -sp "texture"')
+        #将上列命令进行屏蔽,maya内无MayaManInfo命令
     def get_global_texture_dirs(my):
         ''' get global texture dirs if MayaMan is installed'''
-        dir_list = my.app.mel('MayaManInfo -sp "texture"')
+        dir_list = [] #my.app.mel('MayaManInfo -sp "texture"')
         if dir_list:
             dir_list = list(dir_list)
             # remove trailing forward slash, if applicable
             dir_list = [x.rstrip('/') for x in dir_list]
-            return dir_list 
+            return dir_list
         else:
             return []
 
@@ -200,7 +203,7 @@ class MayaImpl(object):
         geo_nodes = my.app.mel("ls -type cacheFile")
         if not geo_nodes:
             return []
-        
+
         node_shapes = []
         if my.app.node_exists(node_name):
             node_shapes = my.app.get_children(node_name, full_path=False, type='shape', recurse=True)
@@ -215,7 +218,7 @@ class MayaImpl(object):
             # skip if not related to this node_name
             # we only support single cache shape for now
             if cache_shapes:
-                cache_shape = cache_shapes[0] 
+                cache_shape = cache_shapes[0]
             if cache_shape not in node_shapes:
                 continue
             geo_paths = my.app.mel('cacheFile -q -f "%s"' % geo_node)
@@ -223,7 +226,7 @@ class MayaImpl(object):
                 if geo_path not in paths:
                     cache_info.append((geo_node, geo_path))
                     paths.append(geo_path)
-                    
+
         cache_info = sorted(cache_info)
         return cache_info
 
@@ -241,7 +244,8 @@ class MayaImpl(object):
             project_dir = sandbox_dir
 
         my.app.set_project(project_dir)
-        my.app.mel('sp_setLocalWorkspaceCallback "%s" "directory"' % project_dir)
+        #将sp_setLocalWorkspaceCallback"%s" "directory"更改为"workspace -dir"
+        my.app.mel('workspace -dir "%s" ' % project_dir)
 
         workspace_path = "%s/workspace.mel" % project_dir
         if os.path.exists(workspace_path):
@@ -260,7 +264,7 @@ class ProgressBar(object):
             title- title
             visible- visibility
             step- number of steps in this process '''
-        
+
     def increment(my):
         pass
 

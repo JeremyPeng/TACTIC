@@ -8,9 +8,9 @@
 # or disclosed in any way without written permission.
 #
 #
-#
+# Hack - add CheckoutVersionlessButtonElementWdg
 
-__all__ = ['TypeTableElementWdg', 'TemplateElementWdg', 'GeneralPublishElementWdg','NotificationTriggerElementWdg','CheckinButtonElementWdg','CheckoutButtonElementWdg','RecipientElementWdg']
+__all__ = ['TypeTableElementWdg', 'TemplateElementWdg', 'GeneralPublishElementWdg','NotificationTriggerElementWdg','CheckinButtonElementWdg','CheckoutButtonElementWdg','CheckoutVersionlessButtonElementWdg','RecipientElementWdg']
 
 import types, re
 
@@ -51,7 +51,7 @@ class TypeTableElementWdg(SimpleTableElementWdg):
         type = my.get_option("type")
         if not type:
             type = my.get_type()
- 
+
         if type in ['color', 'boolean','bigint', 'integer','float']:
             return my.get_value()
         else:
@@ -172,11 +172,11 @@ class GeneralPublishElementWdg(BaseTableElementWdg):
         search_type = sobject.get_search_type()
         search_id = sobject.get_id()
 
-        if my.get_option('preview') != 'false': 
+        if my.get_option('preview') != 'false':
             my.thumb.set_current_index(my.get_current_index())
             widget.add(my.thumb)
 
-        publish_link = PublishLinkWdg(search_type,search_id, config_base=my.view) 
+        publish_link = PublishLinkWdg(search_type,search_id, config_base=my.view)
         div = DivWdg(publish_link)
         div.set_style('clear: left; padding-top: 6px')
         widget.add(div)
@@ -199,7 +199,7 @@ class GeneralPublishElementWdg(BaseTableElementWdg):
 
 
 
- 
+
 
 # DEPRECATED: use ExpressionElementWdg above
 class TemplateElementWdg(SimpleTableElementWdg):
@@ -322,11 +322,11 @@ class IndirectMappedDisplayLabelWdg(BaseTableElementWdg):
 class NotificationTriggerElementWdg(BaseTableElementWdg):
 
     def get_display(my):
-         
+
         search_key = ''
         sobj = my.get_current_sobject()
 
-        top = DivWdg() 
+        top = DivWdg()
         top.add_style("padding-top: 5px")
 
         span = ActionButtonWdg(title="Email Test")
@@ -338,7 +338,7 @@ class NotificationTriggerElementWdg(BaseTableElementWdg):
         return top
 
     def get_behavior(cls, sobject):
-        '''it takes sobject as an argument and turn it into a dictionary to pass to 
+        '''it takes sobject as an argument and turn it into a dictionary to pass to
             NotificationTestCmd'''
         pal = WebContainer.get_web().get_palette()
         bg_color = pal.color('background')
@@ -351,7 +351,7 @@ class NotificationTriggerElementWdg(BaseTableElementWdg):
                    var msg = '';
 
                    try
-                   { 
+                   {
                       spt.app_busy.show( 'Email Test', 'Waiting for email server response...' );
                       rtn = server.execute_cmd('tactic.command.NotificationTestCmd', args={'sobject_dict': %s});
                       msg = rtn.description;
@@ -371,7 +371,7 @@ class NotificationTriggerElementWdg(BaseTableElementWdg):
                    var options = { 'html': '<div><div style="background:%s; padding: 5px">' + msg + '</div></div>'};
                    var kwargs = {'width':'600px'};
                    spt.panel.load_popup(popup_id, class_name, options, kwargs);
-                   
+
                   ''' %(sobj_json, bg_color)}
         return bvr
 
@@ -480,7 +480,7 @@ class CheckinButtonElementWdg(ButtonElementWdg):
         if not checkin_panel_script_path:
             checkin_panel_script_path = ''
         if not validate_script_path:
-            validate_script_path = '' 
+            validate_script_path = ''
 
         lock_process = my.get_option("lock_process")
         if not lock_process:
@@ -498,7 +498,7 @@ class CheckinButtonElementWdg(ButtonElementWdg):
         show_context = my.get_option("show_context")
         show_sub_context = my.get_option("show_sub_context")
 
-        
+
         kwargs = {}
         kwargs['checkin_script'] = checkin_script
         kwargs['checkin_script_path'] = checkin_script_path
@@ -547,7 +547,7 @@ class CheckinButtonElementWdg(ButtonElementWdg):
             try {
                     spt.CustomProject.exec_custom_script(evt, bvr);
                 }
-            
+
             catch(e) {
                 throw(e);
                 spt.alert('No script found[' + bvr.checkin_panel_script_path + ']. <checkin_panel_script_path> display option should refer to a valid script path.');
@@ -657,10 +657,10 @@ class CheckoutButtonElementWdg(ButtonElementWdg):
         my.process = my.get_option('process')
         my.context = ''
         transfer_mode = my.get_option('transfer_mode')
-        
+
         sobject = my.get_current_sobject()
         if sobject.get_id() == -1:
-            sobject = None 
+            sobject = None
 
 
         snapshot_code = my.get_option("snapshot_code")
@@ -668,11 +668,11 @@ class CheckoutButtonElementWdg(ButtonElementWdg):
         if not sandbox_dir and sobject and isinstance(sobject, Snapshot):
             sandbox_dir = sobject.get_sandbox_dir(file_type='main')
    	    snapshot_code = sobject.get_code()
-	 
+
         lock_process = my.get_option("lock_process")
         sobject = my.get_current_sobject()
         search_key = SearchKey.get_by_sobject(sobject)
-        
+
 
         if sobject.get_base_search_type() in ['sthpw/task', 'sthpw/note']:
             my.process = sobject.get_value('process')
@@ -762,15 +762,16 @@ class CheckoutButtonElementWdg(ButtonElementWdg):
         else {
             if (bvr.snapshot_code) {
                 if (!bvr.checkout_script_path){
-                    
+
 
                     spt.app_busy.show("Checking out files", 'To: '+ bvr.sandbox_dir);
-                
+
                     setTimeout( function() {
                         try {
                             var server = TacticServerStub.get();
                             file_types = ['main'];
-                            filename_mode = 'source';
+                            // Hack - filename_mode 'source' to 'repo'
+                            filename_mode = 'repo';
                             // we want this undefined so the checkout
                             // snapshot can deal with it correctly.  Explicitly
                             // putting in a dir will force it to go there,
@@ -809,7 +810,7 @@ class CheckoutButtonElementWdg(ButtonElementWdg):
             }
             else {
                 var class_name = 'tactic.ui.widget.CheckoutWdg';
-	   
+
 	        var values = kwargs;
                 bvr.values = values;
 	        var search_key = values.search_key;
@@ -838,6 +839,213 @@ class CheckoutButtonElementWdg(ButtonElementWdg):
 
         return top
 
+
+# Hack - add CheckoutButtonElementWdg to versionless mode button element
+class CheckoutVersionlessButtonElementWdg(ButtonElementWdg):
+
+    def get_display(my):
+        mode = my.get_option('mode')
+        size = my.get_option('icon_size')
+        if mode == 'add':
+            my.set_option('icon', "CHECK_OUT")
+        else:
+            if size == 'large':
+                my.set_option('icon', "CHECK_OUT_LG")
+            else:
+                my.set_option('icon', "CHECK_OUT_SM")
+
+
+        top = DivWdg()
+        icon = IconButtonWdg( "Checkout", eval( "IconWdg.%s" % my.get_option('icon') ) )
+        top.add(icon)
+
+
+        my.process = my.get_option('process')
+        my.context = ''
+        transfer_mode = my.get_option('transfer_mode')
+
+        sobject = my.get_current_sobject()
+        if sobject.get_id() == -1:
+            sobject = None
+
+
+        snapshot_code = my.get_option("snapshot_code")
+        sandbox_dir = my.get_option("sandbox_dir")
+        if not sandbox_dir and sobject and isinstance(sobject, Snapshot):
+            sandbox_dir = sobject.get_sandbox_dir(file_type='main')
+        snapshot_code = sobject.get_code()
+
+        lock_process = my.get_option("lock_process")
+        sobject = my.get_current_sobject()
+        search_key = SearchKey.get_by_sobject(sobject)
+
+
+        if sobject.get_base_search_type() in ['sthpw/task', 'sthpw/note']:
+            my.process = sobject.get_value('process')
+            my.context = sobject.get_value('context')
+            if not my.process:
+                my.process = ''
+
+            parent = sobject.get_parent()
+            if not parent:
+                return DivWdg()
+            search_key = SearchKey.get_by_sobject(parent)
+        else:
+            my.process = my.get_option('process')
+            search_key = SearchKey.get_by_sobject(sobject)
+
+
+        checkout_script_path = my.get_option("checkout_script_path")
+        checkout_panel_script_path = my.get_option("checkout_panel_script_path")
+        lock_process = my.get_option("lock_process")
+        if not checkout_script_path:
+            checkout_script_path = ''
+        if not checkout_panel_script_path:
+            checkout_panel_script_path = ''
+
+
+        # FIXME: this does not get passed through 'cuz get_display is overridden here
+        # so passed in directly in the script below
+        my.behavior['checkout_panel_script_path'] = checkout_panel_script_path
+        my.behavior['checkout_script_path'] = checkout_script_path
+        my.behavior['process'] = my.process
+        my.behavior['context'] = my.context
+
+        my.behavior['lock_process'] = lock_process
+        my.behavior['search_key'] = search_key
+        my.behavior['snapshot_code'] = snapshot_code
+        my.behavior['sandbox_dir'] = sandbox_dir
+
+        my.behavior['transfer_mode'] = transfer_mode
+
+        #layout_wdg = my.get_layout_wdg()
+        #state = layout_wdg.get_state()
+
+        cbjs_action = '''
+        var kwargs = {
+            search_key: '%(search_key)s',
+            sandbox_dir: '%(sandbox_dir)s',
+            process: '%(process)s',
+            context: '%(context)s',
+            lock_process: '%(lock_process)s',
+            checkout_script_path: '%(checkout_script_path)s'
+        };
+
+
+        var transfer_mode = bvr.transfer_mode;
+        if (!transfer_mode) {
+            transfer_mode = spt.Environment.get().get_transfer_mode();
+        }
+        if (transfer_mode == null) {
+            transfer_mode = 'web';
+        }
+
+        // NOTE: reusing checkin transfer mode
+        if (transfer_mode == 'copy') {
+            transfer_mode = 'client_repo';
+        }
+
+        var values = {};
+        var top = bvr.src_el.getParent(".spt_checkin_top");
+        script = spt.CustomProject.get_script_by_path(bvr.checkout_panel_script_path);
+        if (script)
+        {
+            bvr['script'] = script;
+            bvr.values = kwargs;
+            spt.app_busy.show("Running Checkout Panel Script", kwargs.checkout_panel_script_path);
+            setTimeout( function() {
+            try {
+                spt.CustomProject.exec_custom_script(evt, bvr);
+            }
+            catch(e) {
+                throw(e);
+                spt.alert('No script found. <checkout_panel_script_path> display option should refer to a valid script path.');
+            }
+
+            spt.app_busy.hide();
+            }, 50);
+        }
+        else {
+            if (bvr.snapshot_code) {
+                if (!bvr.checkout_script_path){
+
+
+                    spt.app_busy.show("Checking out files", 'To: '+ bvr.sandbox_dir);
+
+                    setTimeout( function() {
+                        try {
+                            var server = TacticServerStub.get();
+                            file_types = ['main'];
+                            // filename_mode 'source' to 'versionless'
+                            filename_mode = 'versionless';
+                            // we want this undefined so the checkout
+                            // snapshot can deal with it correctly.  Explicitly
+                            // putting in a dir will force it to go there,
+                            // regardless of naming conventions
+                            sandbox_dir = null;
+
+                            server.checkout_snapshot(bvr.snapshot_code, sandbox_dir, {mode: transfer_mode, filename_mode: filename_mode, file_types: file_types} );
+                            var checkin_top = bvr.src_el.getParent(".spt_checkin_top");
+                            if (checkin_top) {
+                                spt.app_busy.show("Reading file system ...")
+                                spt.panel.refresh(checkin_top);
+                                spt.app_busy.hide();
+                            }
+
+                        }
+                        catch(e) {
+                            spt.alert(spt.exception.handler(e));
+                        }
+                        spt.app_busy.hide();
+                    }, 50);
+                }
+                else {
+                    setTimeout( function() {
+                    try {
+                        bvr['script'] = bvr.checkout_script_path;
+                        bvr.values = kwargs;
+                        spt.CustomProject.exec_custom_script(evt, bvr);
+                    }
+                    catch(e) {
+                        spt.alert(spt.exception.handler(e));
+                    }
+                    spt.app_busy.hide();
+                    }, 50);
+                }
+
+            }
+            else {
+                var class_name = 'tactic.ui.widget.CheckoutWdg';
+
+            var values = kwargs;
+                bvr.values = values;
+            var search_key = values.search_key;
+            var sandbox_dir = values.sandbox_dir;
+            var process = values.process;
+            var context = values.context;
+
+            var options = { 'show_publish': 'false',
+              'process': process,
+              'context': context,
+                'search_key': search_key,
+                'checkout_script_path': bvr.checkout_script_path,
+                'sandbox_dir': sandbox_dir
+            };
+            var popup_id ='Check-out Widget';
+            spt.panel.load_popup(popup_id, class_name, options);
+            }
+
+        }
+        ''' % (my.behavior)
+
+        my.behavior['type'] = 'click_up'
+        my.behavior['cbjs_action'] = cbjs_action
+
+        icon.add_behavior(my.behavior)
+
+        return top
+
+
 class RecipientElementWdg(BaseTableElementWdg):
 
     def get_logins(my):
@@ -848,7 +1056,7 @@ class RecipientElementWdg(BaseTableElementWdg):
         search.add_filter('notification_log_id', id)
         notification_logins = search.get_sobjects()
         return notification_logins
-    
+
     def get_display(my):
         notification_logins = my.get_logins()
 
