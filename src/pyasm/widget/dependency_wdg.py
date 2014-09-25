@@ -468,6 +468,7 @@ class DependencyThumbWdg(ThumbWdg):
         span = SpanWdg(css='med')
         #href = HtmlElement.href(filename, image_link)
         href = SpanWdg(filename)
+        href.add_style('font-size: 0.8em')
         href.add_color("color", "color")
         span.add(href)
         widget.add(span)
@@ -475,16 +476,35 @@ class DependencyThumbWdg(ThumbWdg):
 
 
     def get_icon_info(my, image_link, repo_path=None, icon_type='icon'):
-        icon_size = my.get_icon_size()
-        
-        p = re.compile(r'.*(\.jpg|\.png|\.tif)$')
-        if p.match(image_link) and my.info.has_key(icon_type):
-            icon_link = my.info.get('icon')
-        else:
-            icon_link = ThumbWdg.find_icon_link(image_link)
-        
-        if image_link.endswith(".pdf"):
-            icon_size = int( 80.0 / 120.0 * float(icon_size) )
+        ''' if no icon is specified then get the icon based on the main file,
+        otherwise use the specified icon '''
 
-        return icon_link, icon_size
+        icon_info = {}
+
+        icon_size = my.get_icon_size()
+        icon_link = None
+        if my.info.has_key(icon_type):
+            icon_link = my.info[icon_type]
+
+            if not os.path.exists(repo_path):
+                icon_link = ThumbWdg.get_no_image()
+                icon_info['icon_missing'] = True
+
+            # HACK for pdf icons
+            if image_link.endswith(".pdf"):
+                if icon_size.endswith("%"):
+                    icon_size = float(icon_size[0:-1])
+                    icon_size = int( 80.0 / 120.0 * float(icon_size) )
+                    icon_size = '%s%%' %icon_size
+                else:
+                    icon_size = int( 80.0 / 120.0 * float(icon_size) )
+
+        else:
+            icon_link = ThumbWdg.find_icon_link(image_link, repo_path)
+            #icon_size = int( 60.0 / 120.0 * float(icon_size) )
+
+        icon_info['icon_size'] = icon_size
+        icon_info['icon_link'] = icon_link
+
+        return icon_info
 
