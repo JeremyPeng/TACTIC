@@ -565,8 +565,8 @@ class Maya(Application):
         except Exception, e:
             pass
         """
-        ignore_set = set(['defaultLightSet', 'defaultObjectSet']).union(delight_set)
-        #ignore_set = set(['defaultLightSet', 'defaultObjectSet'])
+        #ignore_set = set(['defaultLightSet', 'defaultObjectSet']).union(delight_set)
+        ignore_set = set(['defaultLightSet', 'defaultObjectSet'])
         render_set = set()
         deformer_set = set()
 
